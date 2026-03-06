@@ -1,0 +1,30 @@
+# macOS Virtualization Engine - Ignore List
+
+# --- Core Binary Images (Heavy) ---
+# Ignore virtual hard disks and macOS installers
+*.qcow2
+*.img
+*.dmg
+*.chunklist
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Logs & Temp ---
+*.log
+qemu.command
+# NVRAM variables can sometimes be transient, but we keep the .fd files by default
+# if you want to ignore user-specific NVRAM changes, uncomment below:
+# OVMF_VARS.fd
+
+# --- WSL / Linux specific ---
+*.swp
+*~

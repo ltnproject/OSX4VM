@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSX4VM | Mastered Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050507;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-hover: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.07);
+            --border-bright: rgba(255, 255, 255, 0.15);
+            --text: #F0EEF8;
+            --text-muted: rgba(240, 238, 248, 0.4);
+            --text-dim: rgba(240, 238, 248, 0.6);
+            --accent: #7B6EF6;
+            --accent-soft: rgba(123, 110, 246, 0.15);
+            --accent-glow: rgba(123, 110, 246, 0.4);
+            --lime: #C8FF00;
+            --lime-soft: rgba(200, 255, 0, 0.1);
+            --green: #00E5A0;
+            --warning: #FF9500;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── Background ── */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(123, 110, 246, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(123, 110, 246, 0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+        }
+
+        .bg-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.18;
+        }
+
+        .orb1 {
+            width: 700px;
+            height: 700px;
+            background: var(--accent);
+            top: -200px;
+            left: -100px;
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: #2A8FFF;
+            bottom: 100px;
+            right: -200px;
+        }
+
+        .orb3 {
+            width: 300px;
+            height: 300px;
+            background: var(--lime);
+            top: 50%;
+            left: 60%;
+            opacity: 0.07;
+        }
+
+        .noise {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.025;
+        }
+
+        /* ── Layout ── */
+        .container {
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Nav ── */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 28px 0 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.03em;
+            color: var(--text);
+        }
+
+        .nav-logo span {
+            color: var(--accent);
+        }
+
+        .nav-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #000;
+            background: var(--lime);
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Hero ── */
+        header {
+            padding: 100px 0 80px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 24px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(123, 110, 246, 0.25);
+            padding: 6px 16px;
+            border-radius: 100px;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(3.5rem, 9vw, 6.5rem);
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            margin-bottom: 28px;
+        }
+
+        .h1-main {
+            display: block;
+            background: linear-gradient(160deg, #ffffff 30%, rgba(255, 255, 255, 0.5) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .h1-accent {
+            display: block;
+            background: linear-gradient(135deg, var(--accent) 0%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            font-weight: 300;
+            max-width: 460px;
+            margin: 0 auto 40px;
+            letter-spacing: 0.01em;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 100px;
+            letter-spacing: 0.03em;
+        }
+
+        /* ── Stats bar ── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 60px;
+        }
+
+        .stat {
+            background: var(--surface);
+            padding: 28px 32px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .stat:hover {
+            background: var(--surface-hover);
+        }
+
+        .stat-num {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            letter-spacing: -0.04em;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-num span {
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ── Feature cards ── */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 720px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.3s, background 0.3s;
+            cursor: default;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(123, 110, 246, 0.08) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-3px);
+            background: var(--surface-hover);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 18px;
+        }
+
+        .icon-purple {
+            background: var(--accent-soft);
+        }
+
+        .icon-lime {
+            background: var(--lime-soft);
+        }
+
+        .icon-blue {
+            background: rgba(42, 143, 255, 0.12);
+        }
+
+        .card h2 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.88rem;
+            line-height: 1.65;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 20px;
+        }
+
+        .feature-list li {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-list li::before {
+            content: '◆';
+            font-size: 0.45rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .code-block code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--green);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .copy-btn {
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            padding: 3px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.04em;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+            color: #000;
+            border-color: var(--green);
+        }
+
+        /* ── Guide ── */
+        .guide-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .guide-header {
+            padding: 40px 48px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 32px;
+        }
+
+        .guide-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: -0.03em;
+        }
+
+        .guide-header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        .warning-box {
+            margin: 32px 48px 0;
+            background: rgba(255, 149, 0, 0.07);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 0.86rem;
+            color: rgba(255, 200, 100, 0.85);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .warning-icon {
+            flex-shrink: 0;
+            font-size: 1rem;
+            margin-top: 1px;
+        }
+
+        .warning-box a {
+            color: var(--green);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .warning-box a:hover {
+            text-decoration: underline;
+        }
+
+        .steps-list {
+            padding: 40px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        @media (max-width: 600px) {
+            .guide-header {
+                padding: 28px 24px 24px;
+            }
+
+            .warning-box {
+                margin: 24px 24px 0;
+            }
+
+            .steps-list {
+                padding: 28px 24px;
+            }
+        }
+
+        .step {
+            display: flex;
+            gap: 24px;
+            padding-bottom: 36px;
+            position: relative;
+        }
+
+        .step:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 44px;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, var(--accent) 0%, transparent 100%);
+            opacity: 0.2;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(123, 110, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .step-body {
+            flex-grow: 1;
+            padding-top: 6px;
+        }
+
+        .step-body h3 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .step-body p {
+            color: var(--text-dim);
+            font-size: 0.86rem;
+            line-height: 1.65;
+            margin-bottom: 14px;
+        }
+
+        .step-body p strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* ── Notes / FAQ ── */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 640px) {
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .note-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .note-card .q {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .note-card .q::before {
+            content: '?';
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .note-card .a {
+            color: var(--text-dim);
+            font-size: 0.86rem;
+            line-height: 1.65;
+        }
+
+        /* ── Footer ── */
+        footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 0 0;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-family: 'JetBrains Mono', monospace;
+            gap: 16px;
+        }
+
+        .footer-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
+
+        .footer-logo span {
+            color: var(--accent);
+        }
+
+        .footer-center {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .footer-center a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer-center a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            footer {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+
+        /* ── Virtualization Guide ── */
+        .virt-guide-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            margin-top: 16px;
+        }
+
+        .virt-guide-header {
+            padding: 40px 48px 36px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(to bottom, rgba(123, 110, 246, 0.05), transparent);
+        }
+
+        .virt-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            letter-spacing: 0.03em;
+        }
+
+        .virt-brand {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .virt-sep {
+            color: var(--border-bright);
+        }
+
+        .virt-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.75rem;
+            letter-spacing: -0.03em;
+            margin-bottom: 10px;
+        }
+
+        .virt-desc {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            max-width: 580px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .virt-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .virt-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+        }
+
+        .virt-meta-icon {
+            font-size: 0.4rem;
+            color: var(--border-bright);
+        }
+
+        .virt-meta-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .virt-meta-value {
+            color: var(--text-dim);
+            font-size: 0.82rem;
+        }
+
+        .virt-meta-value.beginner {
+            color: var(--green);
+            background: rgba(0, 229, 160, 0.1);
+            border: 1px solid rgba(0, 229, 160, 0.2);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .virt-steps {
+            padding: 40px 48px;
+        }
+
+        @media (max-width: 600px) {
+            .virt-guide-header {
+                padding: 28px 24px;
+            }
+
+            .virt-steps {
+                padding: 28px 24px;
+            }
+        }
+
+        .code-block.multi-line {
+            align-items: flex-start;
+            padding: 14px 16px;
+        }
+
+        .code-block.multi-line code {
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+
+        .code-comment {
+            color: rgba(0, 229, 160, 0.4);
+        }
+
+        .inline-note {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.83rem;
+            line-height: 1.6;
+        }
+
+        .success-note {
+            background: rgba(0, 229, 160, 0.07);
+            border: 1px solid rgba(0, 229, 160, 0.18);
+            color: rgba(0, 229, 160, 0.85);
+        }
+
+        .warn-note {
+            background: rgba(255, 149, 0, 0.07);
+            border: 1px solid rgba(255, 149, 0, 0.2);
+            color: rgba(255, 200, 100, 0.85);
+        }
+
+        .info-note {
+            background: rgba(123, 110, 246, 0.07);
+            border: 1px solid rgba(123, 110, 246, 0.2);
+            color: rgba(180, 170, 255, 0.85);
+        }
+
+        .bios-keys {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .bios-key {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bios-key .key {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .bios-key .mfr {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .menu-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .menu-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 8px;
+        }
+
+        .virt-labels {
+            margin: 14px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .virt-label-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.87rem;
+            color: var(--text-dim);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .virt-label-item.intel {
+            border-color: rgba(0, 120, 255, 0.2);
+        }
+
+        .virt-label-item.amd {
+            border-color: rgba(229, 47, 32, 0.2);
+        }
+
+        .virt-label-sep {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        .vl-chip {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
+            height: 52px;
+            background: rgba(5, 5, 7, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            transition: border-color 0.3s;
+        }
+
+        .topbar-inner {
+            max-width: 1040px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .topbar-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--text);
+            text-decoration: none;
+            flex-shrink: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-logo span {
+            color: var(--accent);
+        }
+
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .topbar-nav a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            letter-spacing: 0.04em;
+            transition: color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .topbar-nav a:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .topbar-nav a.active {
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .topbar-github {
+            flex-shrink: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            letter-spacing: 0.03em;
+        }
+
+        .topbar-github:hover {
+            color: var(--text);
+            border-color: var(--border-bright);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        @media (max-width: 680px) {
+            .topbar-github {
+                display: none;
+            }
+
+            .topbar-nav a {
+                padding: 6px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar-nav a span {
+                display: none;
+            }
+        }
+
+        /* ── System Files Section ── */
+        .sys-files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+            padding: 0 48px;
+        }
+
+        @media (max-width: 600px) {
+            .sys-files-grid {
+                grid-template-columns: 1fr;
+                padding: 0 24px;
+            }
+        }
+
+        .sys-file-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .sys-file-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .sys-file-info h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .sys-file-info p {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-up {
+            animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-4 {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="topbar" id="topbar">
+        <div class="topbar-inner">
+            <a href="#hero" class="topbar-logo">OSX<span>4</span>VM</a>
+            <div class="topbar-nav">
+                <a href="#features" class="active"><span>Features</span></a>
+                <a href="#setup-guide"><span>Setup Guide</span></a>
+                <a href="#virt-guide"><span>Virtualization</span></a>
+                <a href="#notes"><span>Notes</span></a>
+            </div>
+            <a href="https://github.com/ltnproject/OSX4VM" target="_blank" rel="noopener" class="topbar-github">GitHub
+                ↗</a>
+        </div>
+    </nav>
+
+    <div class="bg-layer">
+        <div class="bg-grid"></div>
+        <div class="bg-orb orb1"></div>
+        <div class="bg-orb orb2"></div>
+        <div class="bg-orb orb3"></div>
+        <div class="noise"></div>
+    </div>
+
+    <div class="container" style="padding-top: 80px;">
+
+        <header id="hero">
+            <div class="hero-eyebrow fade-up delay-1">OpenCore · KVM · macOS</div>
+            <h1 class="fade-up delay-2">
+                <span class="h1-main">Mastered</span>
+                <span class="h1-accent">Edition</span>
+            </h1>
+            <p class="subtitle fade-up delay-3">Highly engineered. Optimized kernel. Intelligent boot engine.</p>
+            <div class="hero-tags fade-up delay-4">
+                <span class="tag">macOS Tahoe (26)</span>
+                <span class="tag">WSL2 + KVM</span>
+                <span class="tag">OpenCore 1.0.5</span>
+                <span class="tag">QEMU 8.x</span>
+            </div>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-bar fade-up delay-1">
+            <div class="stat">
+                <div class="stat-num">128<span>G</span></div>
+                <div class="stat-label">Recommended Disk</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">4<span>+</span></div>
+                <div class="stat-label">Setup Steps</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num"><span>#</span>1</div>
+                <div class="stat-label">KVM Implementation</div>
+            </div>
+        </div>
+
+        <!-- Feature cards -->
+        <div class="feature-grid" id="features">
+            <div class="card fade-up delay-1">
+                <div class="card-icon icon-purple">⚙️</div>
+                <h2>Mastered Engine</h2>
+                <ul class="feature-list">
+                    <li>Advanced ACPI & RTC Patches</li>
+                    <li>Power Management Optimizations</li>
+                    <li>Enhanced WSL2 SMBios Data</li>
+                </ul>
+                <p>A hand-crafted configuration tuned for maximum responsiveness and real Mac-like behavior.</p>
+                <div class="code-block">
+                    <code>OpenCore/config.plist</code>
+                    <button class="copy-btn" data-cmd="OpenCore/config.plist">copy</button>
+                </div>
+            </div>
+            <div class="card fade-up delay-2">
+                <div class="card-icon icon-lime">⬇️</div>
+                <h2>Direct Fetcher</h2>
+                <ul class="feature-list">
+                    <li>Supports Tahoe (26)</li>
+                    <li>Rapid Download Streams</li>
+                    <li>Automated BaseSystem Logic</li>
+                </ul>
+                <p>Get the latest macOS versions directly from Apple with zero overhead and perfect verification.</p>
+                <div class="code-block">
+                    <code>python3 fetch_macos.py</code>
+                    <button class="copy-btn" data-cmd="python3 fetch_macos.py">copy</button>
+                </div>
+            </div>
+            <div class="card fade-up delay-3">
+                <div class="card-icon icon-blue">🚀</div>
+                <h2>Diagnostic Boot</h2>
+                <ul class="feature-list">
+                    <li>Real-time KVM Health Check</li>
+                    <li>Auto-Hardware Optimization</li>
+                    <li>Dynamic RAM/Core Allocation</li>
+                </ul>
+                <p>The engine analyzes your host and tunes the VM for peak stability before every boot.</p>
+                <div class="code-block">
+                    <code>./boot.sh</code>
+                    <button class="copy-btn" data-cmd="./boot.sh">copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guide -->
+        <div class="guide-wrap fade-up delay-2" id="setup-guide">
+            <div class="guide-header">
+                <h2>Setup Guide</h2>
+                <p>Four steps from zero to a running macOS virtual machine.</p>
+            </div>
+            <div class="warning-box">
+                <span class="warning-icon">⚠</span>
+                <span>
+                    <strong>Prerequisite:</strong> Ensure Virtualization (VT-x/AMD-V) is enabled in your BIOS.
+                    On Windows, WSL2 must be installed or use a native Linux environment. &nbsp;
+                    <a href="#virt-guide">View Virtualization Guide ↓</a>
+                </span>
+            </div>
+            <div class="steps-list">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <h3>Fetch macOS Installer</h3>
+                        <p>Run the optimized fetcher to download the official macOS Recovery image directly from Apple's
+                            servers. Support for <strong>Tahoe (26)</strong> is included.</p>
+                        <div class="code-block">
+                            <code>python3 fetch_macos.py</code>
+                            <button class="copy-btn" data-cmd="python3 fetch_macos.py">copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <h3>Create Virtual Disk</h3>
+                        <p>Prepare a high-performance QCOW2 virtual disk for your macOS installation. <strong>64 GB
+                                minimum, 128 GB recommended.</strong></p>
+                        <div class="code-block">
+                            <code>qemu-img create -f qcow2 mac_hdd.qcow2 128G</code>
+                            <button class="copy-btn"
+                                data-cmd="qemu-img create -f qcow2 mac_hdd.qcow2 128G">copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <h3>Initialize Boot Engine</h3>
+                        <p>Launch the master boot engine. It automatically detects your hardware, verifies KVM health,
+                            and optimizes memory mapping for your host.</p>
+                        <div class="code-block">
+                            <code>chmod +x boot.sh && ./boot.sh</code>
+                            <button class="copy-btn" data-cmd="chmod +x boot.sh && ./boot.sh">copy</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <h3>Install macOS</h3>
+                        <p>Once OpenCore loads, select <strong>macOS Base System</strong>. Use Disk Utility to format
+                            your virtual drive as <strong>APFS</strong>, then proceed with the standard installation.
+                            Reboot when prompted.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 0 48px; margin-bottom: 24px;">
+                <h3 style="font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 16px;">
+                    Core System Files</h3>
+                <p style="font-size: 0.86rem; color: var(--text-dim); margin-bottom: 20px;">The engine relies on
+                    specialized UEFI firmware (OVMF) to bridge the gap between KVM and macOS.</p>
+            </div>
+
+            <div class="sys-files-grid">
+                <div class="sys-file-card">
+                    <div class="sys-file-icon">📄</div>
+                    <div class="sys-file-info">
+                        <h4>OVMF_CODE_4M.fd</h4>
+                        <p>The core UEFI firmware binary. This provides the virtual "motherboard" logic for the VM.</p>
+                    </div>
+                </div>
+                <div class="sys-file-card">
+                    <div class="sys-file-icon">💾</div>
+                    <div class="sys-file-info">
+                        <h4>OVMF_VARS.fd</h4>
+                        <p>Default NVRAM storage. This saves your boot settings, screen resolution, and OS parameters.
+                        </p>
+                    </div>
+                </div>
+                <div class="sys-file-card">
+                    <div class="sys-file-icon">🖥️</div>
+                    <div class="sys-file-info">
+                        <h4>OVMF_VARS-1920x1080.fd</h4>
+                        <p>Pre-configured NVRAM specifically tuned for a Full HD viewing experience.</p>
+                    </div>
+                </div>
+                <div class="sys-file-card">
+                    <div class="sys-file-icon">📺</div>
+                    <div class="sys-file-info">
+                        <h4>OVMF_VARS-1024x768.fd</h4>
+                        <p>Legacy resolution NVRAM, ideal for diagnostic sessions or low-resource environments.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="notes-grid" id="notes">
+            <div class="note-card fade-up delay-1">
+                <div class="q">Is this configuration optimized?</div>
+                <div class="a">Yes. This version includes custom kernel tweaks and resource allocation logic not found
+                    in standard repositories. Hand-tuned ACPI patches ensure real Mac-like power behavior.</div>
+            </div>
+            <div class="note-card fade-up delay-2">
+                <div class="q">What platforms are supported?</div>
+                <div class="a">Designed for Windows/WSL2 and native KVM on Linux. Built to be the cleanest OpenCore
+                    implementation available — prioritizing minimal configuration and maximum reliability.</div>
+            </div>
+        </div>
+
+        <!-- Virtualization Guide -->
+        <div class="virt-guide-wrap fade-up" id="virt-guide">
+            <div class="virt-guide-header">
+                <div class="virt-breadcrumb">
+                    <span class="virt-brand">OSX4VM</span>
+                    <span class="virt-sep">›</span>
+                    <span>Guide</span>
+                    <span class="virt-sep">›</span>
+                    <span>Setup Documentation</span>
+                </div>
+                <h2 class="virt-title">How to Enable Virtualization</h2>
+                <p class="virt-desc">Follow these steps to enable hardware virtualization on your system — required for
+                    running virtual machines, emulators, and AI sandbox environments.</p>
+                <div class="virt-meta">
+                    <div class="virt-meta-item">
+                        <span class="virt-meta-icon">◆</span>
+                        <span class="virt-meta-label">Difficulty</span>
+                        <span class="virt-meta-value beginner">Beginner</span>
+                    </div>
+                    <div class="virt-meta-item">
+                        <span class="virt-meta-icon">◆</span>
+                        <span class="virt-meta-label">Time</span>
+                        <span class="virt-meta-value">~5 minutes</span>
+                    </div>
+                    <div class="virt-meta-item">
+                        <span class="virt-meta-icon">◆</span>
+                        <span class="virt-meta-label">Requires</span>
+                        <span class="virt-meta-value">BIOS/UEFI Access</span>
+                    </div>
+                    <div class="virt-meta-item">
+                        <span class="virt-meta-icon">◆</span>
+                        <span class="virt-meta-label">OS</span>
+                        <span class="virt-meta-value">Windows / Linux</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="steps-list virt-steps">
+
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <h3>Check if Virtualization is Already Enabled</h3>
+                        <p>Before entering BIOS, check if virtualization is already active on Windows:</p>
+                        <div class="code-block multi-line">
+                            <code><span class="code-comment"># Press Ctrl + Shift + Esc</span>
+Task Manager → Performance → CPU
+<span class="code-comment"># Look for "Virtualization: Enabled" at the bottom</span></code>
+                            <button class="copy-btn" data-cmd="Task Manager → Performance → CPU">copy</button>
+                        </div>
+                        <div class="inline-note success-note">If it shows <strong>Enabled</strong>, you're all set and
+                            can skip to the end. If it shows <strong>Disabled</strong>, continue to the next step.</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <h3>Restart and Enter BIOS / UEFI Settings</h3>
+                        <p>Restart your computer. As it boots, repeatedly press the BIOS key for your manufacturer:</p>
+                        <div class="bios-keys">
+                            <div class="bios-key"><span class="key">F2</span><span class="mfr">Dell · ASUS · Acer</span>
+                            </div>
+                            <div class="bios-key"><span class="key">F10</span><span class="mfr">HP</span></div>
+                            <div class="bios-key"><span class="key">F1 / F2</span><span class="mfr">Lenovo</span></div>
+                            <div class="bios-key"><span class="key">Del</span><span class="mfr">MSI · Gigabyte</span>
+                            </div>
+                        </div>
+                        <div class="inline-note warn-note">⚠ You must press the key <strong>before</strong> Windows
+                            begins loading. The window is only 1–2 seconds. If you miss it, restart and try again.</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <h3>Find the Virtualization Setting</h3>
+                        <p>Inside BIOS/UEFI, navigate using your keyboard. The virtualization option is typically found
+                            under one of these menus:</p>
+                        <div class="menu-tags">
+                            <span class="menu-tag">Advanced</span>
+                            <span class="menu-tag">CPU Configuration</span>
+                            <span class="menu-tag">System Security</span>
+                            <span class="menu-tag">M.I.T.</span>
+                        </div>
+                        <p style="margin-top:14px;">Look for an option labeled:</p>
+                        <div class="virt-labels">
+                            <div class="virt-label-item intel"><span class="vl-chip">Intel</span> Intel Virtualization
+                                Technology (VT-x)</div>
+                            <div class="virt-label-sep">— or —</div>
+                            <div class="virt-label-item amd"><span class="vl-chip">AMD</span> AMD-V / SVM Mode</div>
+                        </div>
+                        <div class="inline-note info-note">ℹ The exact name and location varies by motherboard. Use the
+                            BIOS search function if available (usually <strong>F9</strong> or a magnifier icon).</div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <h3>Enable Virtualization and Save</h3>
+                        <p>Select the virtualization option and change its value to <strong>Enabled</strong>. Then save
+                            and exit:</p>
+                        <div class="code-block multi-line">
+                            <code><span class="code-comment"># Save and exit shortcut</span>
+Press F10 → Confirm with Yes / Enter</code>
+                            <button class="copy-btn" data-cmd="F10">copy</button>
+                        </div>
+                        <p style="margin-top:14px;">Your computer will reboot automatically. Let it boot normally back
+                            into Windows or your OS.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <div class="step-body">
+                        <h3>Verify Virtualization is Now Enabled</h3>
+                        <p>After booting back in, verify the change worked:</p>
+                        <div class="code-block multi-line">
+                            <code>Task Manager → Performance → CPU
+<span class="code-comment"># "Virtualization: Enabled" should now appear</span></code>
+                            <button class="copy-btn"
+                                data-cmd='systeminfo | findstr "Hyper-V Requirements"'>copy</button>
+                        </div>
+                        <p style="margin-top:14px;">Alternatively, on Windows run in Command Prompt:</p>
+                        <div class="code-block multi-line">
+                            <code>systeminfo | findstr "Hyper-V Requirements"
+<span class="code-comment"># Should show: VM Monitor Mode Extensions: Yes</span></code>
+                            <button class="copy-btn"
+                                data-cmd='systeminfo | findstr "Hyper-V Requirements"'>copy</button>
+                        </div>
+                        <div class="inline-note success-note">If virtualization is confirmed enabled, this step is
+                            complete. 🎉</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-logo">OSX<span>4</span>VM</div>
+            <div class="footer-center">
+                For more detailed information, visit
+                <a href="https://github.com/ltnproject/OSX4VM" target="_blank"
+                    rel="noopener">github.com/ltnproject/OSX4VM</a>
+            </div>
+            <span>© 2026 OSX4VM Project. Privacy and power.</span>
+        </footer>
+
+    </div>
+
+    <script>
+        /* Scroll-spy */
+        const sections = ['features', 'setup-guide', 'virt-guide', 'notes'];
+        const navLinks = document.querySelectorAll('.topbar-nav a');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(a => {
+                        a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+                    });
+                }
+            });
+        }, { rootMargin: '-30% 0px -60% 0px' });
+        sections.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+
+        /* Copy buttons */
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cmd = btn.dataset.cmd || btn.closest('.code-block')?.querySelector('code')?.innerText;
+                if (!cmd) return;
+                navigator.clipboard.writeText(cmd).catch(() => { });
+                btn.textContent = 'copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        });
+
+        /* Card mouse-follow glow */
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+                card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+            });
+        });
+    </script>
+</body>
+
+</html>
