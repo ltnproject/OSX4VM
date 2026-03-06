@@ -1,125 +1,70 @@
 #!/usr/bin/env python3
 import os
 import sys
-import urllib.request
-import plistlib
-import ssl
+import subprocess
 
-# OSX4VM - Superior macOS Downloader (Mastered Edition)
-# ---------------------------------------------------
-# Rebuilt to dynamically parse official Apple catalogs.
-# Supports macOS 10.15 (Catalina) to 26.0 (Tahoe).
+# OSX4VM - Master Recovery Engine (Personal Edition)
+# ------------------------------------------------
+# Supports macOS 10.7 (Lion) to 26.0 (Tahoe)
+# Uses robust Board ID / MLB matching for official Apple downloads.
 
-# Disable SSL verification for some environments
-ssl._create_default_https_context = ssl._create_unverified_context
-
-CATALOGS = [
-    "https://swscan.apple.com/content/catalogs/others/index-15-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard.merged-1.sucatalog",
-    "https://swscan.apple.com/content/catalogs/others/index-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard.merged-1.sucatalog"
-]
-
-VERSION_MAP = {
-    "10.15": "Catalina",
-    "11": "Big Sur",
-    "12": "Monterey",
-    "13": "Ventura",
-    "14": "Sonoma",
-    "15": "Sequoia",
-    "26": "Tahoe"
+RECOVERY_DATA = {
+    "1":  {"name": "Lion (10.7)", "bid": "Mac-2E6FAB96566FE58C", "m": "00000000000F25Y00"},
+    "2":  {"name": "Mountain Lion (10.8)", "bid": "Mac-7DF2A3B5E5D671ED", "m": "00000000000F65100"},
+    "3":  {"name": "Mavericks (10.9)", "bid": "Mac-F60DEB81FF30ACF6", "m": "00000000000FNN100"},
+    "4":  {"name": "Yosemite (10.10)", "bid": "Mac-E43C1C25D4880AD6", "m": "00000000000GDVW00"},
+    "5":  {"name": "El Capitan (10.11)", "bid": "Mac-FFE5EF870D7BA81A", "m": "00000000000GQRX00"},
+    "6":  {"name": "Sierra (10.12)", "bid": "Mac-77F17D7DA9285301", "m": "00000000000J0DX00"},
+    "7":  {"name": "High Sierra (10.13)", "bid": "Mac-7BA5B2D9E42DDD94", "m": "00000000000J80300"},
+    "8":  {"name": "Mojave (10.14)", "bid": "Mac-7BA5B2DFE22DDD8C", "m": "00000000000KXPG00"},
+    "9":  {"name": "Catalina (10.15)", "bid": "Mac-CFF7D910A743CAAF", "m": "00000000000PHCD00"},
+    "10": {"name": "Big Sur (11)", "bid": "Mac-2BD1B31983FE1663", "m": "00000000000000000"},
+    "11": {"name": "Monterey (12)", "bid": "Mac-E43C1C25D4880AD6", "m": "00000000000000000"},
+    "12": {"name": "Ventura (13)", "bid": "Mac-B4831CEBD52A0C4C", "m": "00000000000000000"},
+    "13": {"name": "Sonoma (14)", "bid": "Mac-827FAC58A8FDFA22", "m": "00000000000000000"},
+    "14": {"name": "Sequoia (15)", "bid": "Mac-7BA5B2D9E42DDD94", "m": "00000000000000000"},
+    "15": {"name": "Tahoe (26, Latest)", "bid": "Mac-CFF7D910A743CAAF", "m": "00000000000000000", "latest": True},
 }
 
-def get_catalog_content(url):
-    try:
-        with urllib.request.urlopen(url) as response:
-            return response.read()
-    except Exception as e:
-        print(f"[-] Failed to fetch catalog {url}: {e}")
-        return None
-
-def parse_catalog(content):
-    try:
-        data = plistlib.loads(content)
-        products = data.get("Products", {})
-        found = {}
-
-        for prod_id, prod_data in products.items():
-            packages = prod_data.get("Packages", [])
-            for pkg in packages:
-                url = pkg.get("URL", "")
-                # Find InstallAssistant.pkg (Big Sur+) or BaseSystem.dmg (older)
-                if "InstallAssistant.pkg" in url or "BaseSystem.dmg" in url:
-                    # Try to extract version from extended info if available
-                    # For simplicity in this engine, we match known patterns
-                    for ver, name in VERSION_MAP.items():
-                        if ver in url or name.replace(" ", "") in url:
-                            found[ver] = {"name": f"macOS {name} ({ver})", "url": url}
-        return found
-    except Exception as e:
-        print(f"[-] Error parsing catalog: {e}")
-        return {}
-
-def download_file(url, out_path):
-    print(f"[*] Downloading from: {url}")
-    print(f"[*] Saving to: {out_path}")
-    try:
-        with urllib.request.urlopen(url) as response, open(out_path, 'wb') as out_file:
-            length = response.getheader('content-length')
-            if length:
-                length = int(length)
-                block_size = 1024 * 128
-                downloaded = 0
-                while True:
-                    buf = response.read(block_size)
-                    if not buf: break
-                    downloaded += len(buf)
-                    out_file.write(buf)
-                    percent = (downloaded / length) * 100
-                    sys.stdout.write(f"\r[+] Progress: {percent:.1f}% ({downloaded/1024/1024:.1f}MB / {length/1024/1024:.1f}MB)")
-                    sys.stdout.flush()
-            else:
-                out_file.write(response.read())
-        print("\n[+] Download complete.")
-    except Exception as e:
-        print(f"\n[-] Download failed: {e}")
-
 def main():
-    print("\033[36mOSX4VM Superior Downloader v1.5 (Dynamic Catalog Engine)\033[0m")
-    print("-----------------------------------------------------------------")
+    print("\033[1;36mOSX4VM Master Recovery Engine\033[0m")
+    print("-----------------------------------")
     
-    all_found = {}
-    print("[*] Contacting Apple Software Update Servers...")
-    for cat_url in CATALOGS:
-        content = get_catalog_content(cat_url)
-        if content:
-            found = parse_catalog(content)
-            all_found.update(found)
-
-    if not all_found:
-        print("[-] No valid macOS installers found in current catalogs.")
-        print("[!] Falling back to emergency direct links...")
-        # Emergency fallbacks if catalog parsing fails
-        all_found = {
-            "14": {"name": "macOS Sonoma (14)", "url": "http://swcdn.apple.com/content/downloads/12/37/042-45246-A_7B6C5D4E3F/m2y8p5p5p5p5p5p5p5p5p5p5p5p5p5p5/BaseSystem.dmg"},
-            "15": {"name": "macOS Sequoia (15)", "url": "https://swcdn.apple.com/content/downloads/47/16/089-70987-A_PWKNKEFQ1D/sjlq45liw0g5lor3a6i89vz7paml1xpq6w/InstallAssistant.pkg"}
-        }
-
-    # Sort versions
-    sorted_keys = sorted(all_found.keys(), key=lambda x: float(x) if "." in x else int(x))
-    
-    for i, key in enumerate(sorted_keys, 1):
-        print(f"{i}. {all_found[key]['name']}")
+    for k, v in RECOVERY_DATA.items():
+        print(f"{k.rjust(2)}. {v['name']}")
     
     try:
-        choice = int(input(f"\nSelect version to fetch (1-{len(sorted_keys)}): ")) - 1
-        if 0 <= choice < len(sorted_keys):
-            target = all_found[sorted_keys[choice]]
-            filename = "BaseSystem.dmg" if "BaseSystem.dmg" in target["url"] else "InstallAssistant.pkg"
-            download_file(target["url"], filename)
-            print(f"\n[!] Success. Use {filename} with ./boot.sh to begin installation.")
-        else:
+        choice = input("\nSelect version to fetch (1-15): ")
+        if choice not in RECOVERY_DATA:
             print("[-] Invalid selection.")
-    except ValueError:
-        print("[-] Please enter a number.")
+            return
+
+        target = RECOVERY_DATA[choice]
+        print(f"[*] Fetching recovery data for {target['name']}...")
+
+        # Ensure macrecovery.py exists or is fetched if needed
+        # For the Mastered Edition, we assume it's part of the engine
+        cmd = [
+            sys.executable, "macrecovery.py",
+            "-b", target["bid"],
+            "-m", target["m"]
+        ]
+        
+        if target.get("latest"):
+            cmd += ["-os", "latest"]
+            
+        cmd.append("download")
+
+        print(f"[*] Executing: {' '.join(cmd)}")
+        subprocess.run(cmd)
+
+        print("\n[!] If download succeeded, you will see BaseSystem.dmg/chunklist in this folder.")
+        print("[!] Run ./boot.sh to begin installation.")
+
+    except KeyboardInterrupt:
+        print("\n[-] Operation cancelled.")
+    except Exception as e:
+        print(f"[-] Error: {e}")
 
 if __name__ == "__main__":
     main()
