@@ -44,7 +44,7 @@ def main():
 
         cmd = [
             str(sys.executable), "macrecovery.py",
-            "--board", str(target["bid"]),
+            "--board-id", str(target["bid"]),
             "--mlb", str(target["m"]),
             "--os-type", str(target.get("os", "default")),
             "--action", "download"
@@ -65,3 +65,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
