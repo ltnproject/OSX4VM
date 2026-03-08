@@ -42,13 +42,13 @@ def main():
         target = RECOVERY_DATA[int(choice)-1]
         print(f"[*] Initializing secure stream for {target['name']}...")
 
-        cmd = [
-            str(sys.executable), "macrecovery.py",
-            "--board-id", str(target["bid"]),
-            "--mlb", str(target["m"]),
-            "--os-type", str(target.get("os", "default")),
-            "--action", "download"
-        ]
+       cmd = [
+    str(sys.executable), "macrecovery.py",
+    "download",
+    "--board-id", str(target["bid"]),
+    "--mlb", str(target["m"]),
+    "-os", str(target.get("os", "default"))
+]
 
         print(f"[*] Executing official recovery logic...")
         subprocess.run(cmd, check=True)
@@ -65,4 +65,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
