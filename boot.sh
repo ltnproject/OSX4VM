@@ -80,7 +80,11 @@ ARGS=(
     -drive if=pflash,format=raw,file="./OVMF_VARS.fd"
     -smbios type=2
     -device ich9-intel-hda -device hda-duplex
+    -device ich9-ahci,id=sata
     -drive id=OpenCore,if=none,snapshot=on,format=qcow2,file="./OpenCore/OpenCore.qcow2"
+    -device ide-hd,bus=sata.2,drive=OpenCore
+    -drive id=MacHDD,if=none,file="./mac_hdd.qcow2",format=qcow2
+    -device ide-hd,bus=sata.3,drive=MacHDD
     -device ide-hd,bus=sata.2,drive=OpenCore
     -drive id=MacHDD,if=none,file="./mac_hdd.qcow2",format=qcow2
     -device ide-hd,bus=sata.3,drive=MacHDD
